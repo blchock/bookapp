@@ -3,6 +3,7 @@
 ## Project setup
 ```
 npm install
+npm install vue-cookies --save
 ```
 
 ### Compiles and hot-reloads for development
