@@ -336,11 +336,14 @@ export default {
       });
       const reader = new FileReader();
       reader.onload = e => {
+        this.texts = [];
+        this.showTxts = [];
+        this.loadedCount = 0;
+        this.curFlag = 0;
         let splitTxt = ":::split:::";
         let str = e.target.result;
         str = str.replace(/\r\n/g, splitTxt);
         let lines = str.split(splitTxt);
-        this.texts = [];
         for (const j in lines) {
           let str = lines[j];
           if (!str.match(/^\s*$/)) this.texts.push(str);
