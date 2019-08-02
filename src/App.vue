@@ -16,7 +16,7 @@
     </div>
     <affix :offset="10" class="affixBtn">
       <el-dropdown @command="cmd">
-        <img src="./assets/logo.png" alt />
+        <img src="./assets/logo.png" alt :style="'opacity:' + btnOpacity / 100" />
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="book">书架</el-dropdown-item>
           <el-dropdown-item command="flag">书签</el-dropdown-item>
@@ -65,8 +65,14 @@
       </div>
       <div class="item">
         <div class="i-title">背景模糊度</div>
-        <div class="i-content dlg-b">
+        <div class="i-content">
           <el-slider class="ic-item ic-slider" v-model="blur"></el-slider>
+        </div>
+      </div>
+      <div class="item">
+        <div class="i-title">图标透明度</div>
+        <div class="i-content dlg-b">
+          <el-slider class="ic-item ic-slider" v-model="btnOpacity"></el-slider>
         </div>
       </div>
       <span slot="footer" class="dialog-footer">
@@ -251,6 +257,7 @@ export default {
         "font-family: '微软雅黑',font-size: 18px; line-height: 50px; padding: 50px;",
       imageUrl: "",
       imgOpacity: 100,
+      btnOpacity: 100,
       isFull: true,
       blur: 0,
       curSelectFile: "",
@@ -373,29 +380,32 @@ export default {
     resetImg() {
       this.imageUrl = "";
     },
-    onBgOk() {
-      let bg =
-        "opacity: " +
-        this.imgOpacity / 100 +
-        "; -webkit-filter: blur(" +
-        this.blur / 10 +
-        "px); filter: blur(" +
-        this.blur / 10 +
-        "px); ";
-      if (this.isFull) {
-        this.$cookies.set("ba_bg_isfull", this.isFull);
-      }
+    setBg() {
+      let bg = "";
       if (this.imageUrl.length > 0) {
-        this.$cookies.set("ba_bgc", bg);
         bg = bg + "background:url(" + this.imageUrl + ") no-repeat; ";
         if (this.isFull) {
           bg = bg + "background-size:100%; ";
         }
       } else {
         bg = "background-color:" + this.bgColor + ";";
-        this.$cookies.set("ba_bgc", bg);
       }
+      bg += "opacity: " +
+        this.imgOpacity / 100 +
+        "; -webkit-filter: blur(" +
+        this.blur / 10 +
+        "px); filter: blur(" +
+        this.blur / 10 +
+        "px); ";
       this.bgc = bg;
+    },
+    onBgOk() {
+      this.setBg();
+      this.$cookies.set("ba_opacity", this.imgOpacity);
+      this.$cookies.set("ba_blur", this.blur);
+      this.$cookies.set("ba_bgcolor", this.bgColor);
+      this.$cookies.set("ba_bg_isfull", this.isFull);
+      this.$cookies.set("ba_btnopacity", this.btnOpacity);
       this.bgDlg = false;
     },
     onBookOk() {
@@ -434,10 +444,7 @@ export default {
       this.fontDlg = false;
     },
     onGuideOk() {
-      this.bgc = this.bgc + "background:url(" + this.imageUrl + ") no-repeat; ";
-      if (this.isFull) {
-        this.bgc = this.bgc + "background-size:100%; ";
-      }
+      this.setBg();
       this.guideDlg = false;
       this.openBook(true);
     },
@@ -544,20 +551,35 @@ export default {
   mounted() {
     this.isReading = false;
     // console.log("hello!", this.$cookies.keys());
-    if (this.$cookies.isKey("ba_bgc")) {
-      this.bgc = this.$cookies.get("ba_bgc");
+    if (this.$cookies.isKey("ba_opacity")) {
+      this.imgOpacity = Number(this.$cookies.get("ba_opacity"));
     }
+    if (this.$cookies.isKey("ba_btnopacity")) {
+      this.btnOpacity = Number(this.$cookies.get("ba_btnopacity"));
+    }
+    if (this.$cookies.isKey("ba_blur")) {
+      this.blur = Number(this.$cookies.get("ba_blur"));
+    }
+    if (this.$cookies.isKey("ba_bgcolor")) {
+      this.bgColor = this.$cookies.get("ba_bgcolor");
+    }
+    if (this.$cookies.isKey("ba_bg_isfull")) {
+      this.isFull = false;
+      if (this.$cookies.get("ba_bg_isfull") === "true") {
+        this.isFull = true;
+      }
+    }
+    // console.log("init",{
+    //   imgOpacity: this.imgOpacity,
+    //   blur: this.blur,
+    //   bgColor: this.bgColor,
+    //   isFull: this.isFull
+    // })
     if (this.$cookies.isKey("ba_txt")) {
       this.txt = this.$cookies.get("ba_txt");
     }
     if (this.$cookies.isKey("ba_code")) {
       this.textCode = this.$cookies.get("ba_code");
-    }
-    if (this.$cookies.isKey("ba_bg_isfull")) {
-      this.isFull = false;
-      if (this.$cookies.get("ba_bg_isfull")) {
-        this.isFull = true;
-      }
     }
     if (this.$cookies.isKey("ba_flags")) {
       this.flags = JSON.parse(this.$cookies.get("ba_flags"));
