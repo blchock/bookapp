@@ -368,10 +368,19 @@ export default {
       } else if (Command === "flag") {
         this.flagDrawer = true;
       } else if (Command === "about") {
-        this.$alert(
-          "欢迎使用书App阅读器！制作者：BlChock 如有疑问请发邮件至510729981@qq.com",
-          "书App"
-        );
+        this.$alert(`
+          <div>
+            <p>欢迎使用书App阅读器！</p>
+            <p>制作者：BlChock</p>
+            <p>如有疑问请发邮件至510729981@qq.com</p>
+            <p>如果您觉得好用请支持我，您的支持是我最大的动力！</p>
+          </div>
+          <div style="text-align:center;margin-top:20px;">
+            <img src="pay.png" width="200" />
+          </div>
+        `, '书App', {
+          dangerouslyUseHTMLString: true
+        });
       }
     },
     imgChanged(file) {
