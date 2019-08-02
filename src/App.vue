@@ -5,7 +5,7 @@
         class="text-content infinite-list"
         v-infinite-scroll="loadText"
         style="overflow:auto"
-        infinite-scroll-distance="0"
+        infinite-scroll-distance="100"
         :style="txt"
         ref="mains"
         @scroll="onScrollUl"
@@ -282,14 +282,12 @@ export default {
         // console.log(id,this.loadedCount);
         let needLoad = id - this.loadedCount + this.loadOnce;
         this.loadText(needLoad);
-        this.$nextTick(() => {
-          window.location.hash = "#" + id;
-          if (func) func();
-        });
-      } else {
-        window.location.hash = "#" + id;
-        if (func) func();
       }
+      this.$nextTick(() => {
+        // window.location.hash = "#" + id;
+        location.href = "#" + id;
+        if (func) func();
+      });
     },
     loadText(numOfLoad) {
       numOfLoad = numOfLoad || this.loadOnce;
@@ -466,13 +464,8 @@ export default {
         });
         return;
       }
-      // const loading = this.$loading({
-      //   lock: true,
-      //   text: "正在打开书签..."
-      // });
-      this.gotoFlag(tag.pos, () => {
-        // loading.close();
-      });
+      // console.log("clickFlag:",tag);
+      this.gotoFlag(tag.pos);
       this.flagDrawer = false;
     },
     showInput() {
