@@ -194,11 +194,12 @@
         <el-button type="primary" @click="onGuideOk">进入阅读</el-button>
       </span>
     </el-dialog>
-    <el-drawer title="我的书签" :visible.sync="flagDrawer" direction="rtl">
+    <el-drawer title="我的书签" :visible.sync="flagDrawer" direction="rtl" size="420px">
       <div class="flagPane">
         <el-card class="box-card">
           <div slot="header" class="clearfix">
             <span>创建书签</span>
+            <el-button style="float: right; padding: 3px 0" type="text" @click="clearFlags">全部删除</el-button>
           </div>
           <el-radio-group v-model="curType" class="f-radio">
             <el-radio class="f-radio-item" label>蓝</el-radio>
@@ -452,6 +453,22 @@ export default {
       )
         .then(() => {
           this.flags.splice(this.flags.indexOf(tag), 1);
+          this.$cookies.set("ba_flags", JSON.stringify(this.flags));
+        })
+        .catch(() => {});
+    },
+    clearFlags() {
+      this.$confirm(
+        "此操作将永久删除所有书签，无法恢复！请谨慎操作。是否继续?",
+        "提示",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning"
+        }
+      )
+        .then(() => {
+          this.flags = [];
           this.$cookies.set("ba_flags", JSON.stringify(this.flags));
         })
         .catch(() => {});
