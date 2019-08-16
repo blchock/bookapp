@@ -23,6 +23,7 @@
           <el-dropdown-item divided command="bg">背景</el-dropdown-item>
           <el-dropdown-item command="font">字体</el-dropdown-item>
           <el-dropdown-item divided command="about">关于</el-dropdown-item>
+          <el-dropdown-item divided>{{curPercent}}%</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </affix>
@@ -204,7 +205,7 @@
       <div class="flagPane">
         <el-card class="box-card">
           <div slot="header" class="clearfix">
-            <span>创建书签</span>
+            <span>创建书签 (已读 {{curPercent}}%)</span>
             <el-button style="float: right; padding: 3px 0" type="text" @click="clearFlags">全部删除</el-button>
           </div>
           <el-radio-group v-model="curType" class="f-radio">
@@ -222,6 +223,7 @@
             size="small"
             @keyup.enter.native="handleInputConfirm"
             @blur="handleInputConfirm"
+            placeholder="书签名 (支持跳转 名称@百分比,如:书签1@80.5%)"
           ></el-input>
           <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 新建书签</el-button>
         </el-card>
@@ -267,7 +269,6 @@ export default {
       texts: [],
       firstLoad: 100,
       loadOnce: 30,
-      loadedCount: 0,
       showTxts: [],
       textCode: "gb2312",
       fontDlg: false,
@@ -281,6 +282,9 @@ export default {
       guideDlg: false,
       isReading: false,
       flagDrawer: false,
+      loadedStart: 0, // 现在阅读区间
+      loadedCount: 0,
+      maxResetSize: 300, // 超过这个值就会清空当前加载的内容 重新加载
       curFlag: 0 // 当前书签位置
     };
   },
@@ -291,11 +295,34 @@ export default {
         let needLoad = id - this.loadedCount + this.loadOnce;
         this.loadText(needLoad);
       }
+      if(id < this.loadedStart) {
+        this.reloadText(id);
+      }
       this.$nextTick(() => {
         // window.location.hash = "#" + id;
         location.href = "#" + id;
+        this.curFlag = id;
         if (func) func();
       });
+    },
+    reloadText(id) {
+      if (this.isReading && this.texts.length > 0) {
+        let total = this.texts.length;
+        this.showTxts = [];
+        let lastCount = id;
+        let numOfLoad = this.loadOnce;
+        this.loadedCount = lastCount + this.loadOnce;
+        if(this.loadedCount > total) { this.loadedCount = total; numOfLoad = total - lastCount; }
+        this.loadedStart = lastCount;
+        for (let i = 0; i < numOfLoad; i++) {
+          let id = i + lastCount;
+          this.showTxts.push(this.texts[id]);
+        }
+      } else {
+        this.$message({
+          message: "这本书已经读完了！"
+        });
+      }
     },
     loadText(numOfLoad) {
       numOfLoad = numOfLoad || this.loadOnce;
@@ -303,15 +330,21 @@ export default {
       if (this.isReading && this.texts.length > 0) {
         let total = this.texts.length;
         if (this.loadedCount < total - 1) {
+          let lastCount = this.loadedCount;
+          this.loadedCount += numOfLoad;
+          if(this.loadedCount > total) { this.loadedCount = total; numOfLoad = total - lastCount; }
+          if(numOfLoad > this.maxResetSize) {
+            this.showTxts = [];
+            lastCount = this.loadedCount;
+            this.loadedStart = lastCount;
+            numOfLoad = this.loadOnce;
+            this.loadedCount += numOfLoad;
+            if(this.loadedCount > total) { this.loadedCount = total; numOfLoad = total - lastCount; }
+          }
           for (let i = 0; i < numOfLoad; i++) {
-            let id = i + this.loadedCount;
-            if (id >= total) {
-              this.loadedCount = total;
-              return;
-            }
+            let id = i + lastCount;
             this.showTxts.push(this.texts[id]);
           }
-          this.loadedCount += numOfLoad;
         } else {
           this.$message({
             message: "这本书已经读完了！"
@@ -340,6 +373,7 @@ export default {
         this.showTxts = [];
         this.loadedCount = 0;
         this.curFlag = 0;
+        this.loadedStart = 0;
         let splitTxt = ":::split:::";
         let str = e.target.result;
         str = str.replace(/\r\n/g, splitTxt);
@@ -521,13 +555,18 @@ export default {
           this.inputValue = "";
           return;
         }
-        let inputValue = this.inputValue;
+        let inp = this.inputValue.split('@');
+        let inputValue = inp[0];
+        let pos = this.curFlag;
+        if(inp.length === 2) { // 有@存在 获取@后的定位值
+          pos = this.getPercentFlag(inp[1]);
+        }
         if (inputValue) {
           this.flags.push({
             book: this.thisBookName,
             name: inputValue,
             time: this.Com.fmtDate("yyyy-MM-dd hh:mm:ss", new Date()),
-            pos: this.curFlag,
+            pos: pos,
             type: this.curType
           });
         }
@@ -556,9 +595,23 @@ export default {
         }
         // console.log("最顶上的li元素:",this.curFlag);
       }
+    },
+    getPercentFlag(per) { // 获取百分比位置的标签
+      let fPos = per.lastIndexOf('%');
+      if( fPos !== -1) {
+        per = per.slice(0,fPos)
+      }
+      return Math.ceil(Number(per) / 100 * this.texts.length);
     }
   },
-  computed: {},
+  computed: {
+    curPercent() { // 获取当前阅读百分比
+      if(this.texts.length > 0) {
+        return Math.floor(this.curFlag / this.texts.length * 1000) / 10;
+      }
+      return 0;
+    },
+  },
   components: {},
   mounted() {
     this.isReading = false;
