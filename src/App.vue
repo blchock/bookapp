@@ -10,7 +10,7 @@
         ref="mains"
         @scroll="onScrollUl"
       >
-        <li :id="ind" v-for="(txt,ind) in showTxts" :key="ind" class="infinite-list-item">{{ txt }}</li>
+        <li :id="ind + loadedStart" v-for="(txt,ind) in showTxts" :key="ind" class="infinite-list-item">{{ txt }}</li>
       </ul>
       <div class="main-bg" :style="bgc"></div>
     </div>
@@ -23,7 +23,7 @@
           <el-dropdown-item divided command="bg">背景</el-dropdown-item>
           <el-dropdown-item command="font">字体</el-dropdown-item>
           <el-dropdown-item divided command="about">关于</el-dropdown-item>
-          <el-dropdown-item divided>{{curPercent}}%</el-dropdown-item>
+          <el-dropdown-item divided command="percent">{{curPercent}}%</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </affix>
@@ -285,6 +285,7 @@ export default {
       loadedStart: 0, // 现在阅读区间
       loadedCount: 0,
       maxResetSize: 300, // 超过这个值就会清空当前加载的内容 重新加载
+      nowFlagName: "",
       curFlag: 0 // 当前书签位置
     };
   },
@@ -418,6 +419,21 @@ export default {
         `, '书App', {
           dangerouslyUseHTMLString: true
         });
+      } else if (Command === "percent") {
+        if(this.isReading) {
+          this.$alert(`
+            <div>
+              <p>您正在阅读 ${this.thisBookName}</p>
+              <p>这本书共有 ${this.texts.length} 段文章</p>
+              <p>您已经阅读了 ${this.curFlag} 段文章</p>
+              <p>当前阅读进度为 ${this.curPercent}%</p>
+              <p>最近您使用的书签为 ${this.nowFlagName}</p>
+              <p>建议您及时保存书签，以便下次打开书本继续阅读！</p>
+            </div>
+          `, '书App', {
+            dangerouslyUseHTMLString: true
+          });
+        }
       }
     },
     imgChanged(file) {
@@ -537,6 +553,7 @@ export default {
       // console.log("clickFlag:",tag);
       this.gotoFlag(tag.pos);
       this.flagDrawer = false;
+      this.nowFlagName = tag.name;
     },
     showInput() {
       this.inputVisible = true;
@@ -579,19 +596,25 @@ export default {
     findNextFlag(pos, dt) {
       let newId = this.curFlag + dt;
       if (newId > this.loadedCount || newId < 0) return this.curFlag;
-      let p = document.getElementById(this.curFlag + dt).offsetTop;
-      if (dt > 0 && pos > p) return this.findNextFlag(pos, dt + 1);
-      if (dt < 0 && pos < p) return this.findNextFlag(pos, dt - 1);
+      let el = document.getElementById(this.curFlag + dt);
+      if(el && el.offsetTop) {
+        let p = el.offsetTop;
+        if (dt > 0 && pos > p) return this.findNextFlag(pos, dt + 1);
+        if (dt < 0 && pos < p) return this.findNextFlag(pos, dt - 1);
+      } else return this.curFlag;
       return newId;
     },
     onScrollUl(e) {
       if (this.isReading) {
         let scrollTop = e.srcElement.scrollTop;
-        let lastPos = document.getElementById(this.curFlag).offsetTop;
-        if (scrollTop > lastPos) {
-          this.curFlag = this.findNextFlag(scrollTop, 1);
-        } else if (scrollTop < lastPos) {
-          this.curFlag = this.findNextFlag(scrollTop, -1);
+        let el = document.getElementById(this.curFlag)
+        if(el && el.offsetTop) {
+          let lastPos = el.offsetTop;
+          if (scrollTop > lastPos) {
+            this.curFlag = this.findNextFlag(scrollTop, 1);
+          } else if (scrollTop < lastPos) {
+            this.curFlag = this.findNextFlag(scrollTop, -1);
+          }
         }
         // console.log("最顶上的li元素:",this.curFlag);
       }
