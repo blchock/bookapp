@@ -16,7 +16,7 @@
     </div>
     <affix :offset="10" class="affixBtn">
       <el-dropdown @command="cmd">
-        <img src="/public/logo.png" alt :style="'opacity:' + btnOpacity / 100" />
+        <img src="/bookapp/public/logo.png" alt :style="'opacity:' + btnOpacity / 100" />
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="book">书架</el-dropdown-item>
           <el-dropdown-item command="flag">书签</el-dropdown-item>
@@ -414,7 +414,7 @@ export default {
             <p>如果您觉得好用请支持我，您的支持是我最大的动力！</p>
           </div>
           <div style="text-align:center;margin-top:20px;">
-            <img src="/public/pay.png" width="200" />
+            <img src="/bookapp/public/pay.png" width="200" />
           </div>
         `, '网书', {
           dangerouslyUseHTMLString: true
