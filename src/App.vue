@@ -43,7 +43,7 @@
             :show-file-list="false"
             :on-change="imgChanged"
           >
-            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+            <img v-if="imageUrl" :src="imageData" class="avatar" />
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
           <el-button class="ic-item" @click="resetImg" size="mini">重置</el-button>
@@ -191,7 +191,7 @@
             :show-file-list="false"
             :on-change="imgChanged"
           >
-            <img v-if="imageUrl" :src="imageUrl" class="avatar" />
+            <img v-if="imageUrl" :src="imageData" class="avatar" />
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
           <el-button class="ic-item" @click="resetImg" size="mini">重置</el-button>
