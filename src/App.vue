@@ -223,7 +223,7 @@
             size="small"
             @keyup.enter.native="handleInputConfirm"
             @blur="handleInputConfirm"
-            placeholder="书签名 (支持跳转 名称@百分比,如:书签1@80.5%)"
+            placeholder="书签名 (支持 名称@已读百分比,如:书签1@80.5%)"
           ></el-input>
           <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 新建书签</el-button>
         </el-card>
@@ -800,7 +800,7 @@ input .selectFile {
   padding-bottom: 0;
 }
 .input-new-tag {
-  width: 90px;
+  width: 260px;
   vertical-align: bottom;
 }
 .f-radio {
