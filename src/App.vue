@@ -393,6 +393,10 @@ export default {
         this.thisBookName = this.Com.getFileName(this.thisBook.name);
         // console.log("this.thisBookName",this.thisBookName)
         this.isReading = true;
+        if (localStorage.getItem("CurBook") == this.thisBook.name) { // 书本相同，读取书签
+          this.gotoFlag(Number(localStorage.getItem("CurPos")));
+        }
+        localStorage.setItem("CurBook", this.thisBook.name);
       };
       reader.readAsText(this.thisBook, this.textCode);
     },
@@ -630,6 +634,7 @@ export default {
             this.curFlag = this.findNextFlag(scrollTop, -1);
           }
         }
+        localStorage.setItem("CurPos", this.curFlag);
         // console.log("最顶上的li元素:",this.curFlag);
       }
     },
