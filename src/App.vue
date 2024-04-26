@@ -167,14 +167,14 @@
       </span>
     </el-dialog>
     <el-dialog
-      title="欢迎使用书App阅读器！"
+      title="欢迎使用网书阅读器！"
       :visible.sync="guideDlg"
       width="400px"
       :close-on-click-modal="false"
     >
       <div
         class="about"
-      >书App阅读器是一款离线阅读应用，由于网页安全限制，每次启动您需要手动打开上次阅读的书籍和设置的背景图片(建议您将阅读的书籍和图片放到一个专用目录)。给您造成的使用麻烦请体谅。感谢您的使用！祝您阅读愉快！</div>
+      >网书阅读器是一款离线阅读应用，由于网页安全限制，每次启动您需要手动打开上次阅读的书籍和设置的背景图片(建议您将阅读的书籍和图片放到一个专用目录)。给您造成的使用麻烦请体谅。感谢您的使用！祝您阅读愉快！</div>
       <!-- <div class="hint">由于浏览器安全限制，网站无法读取本地路径，请您设置目录以便重新打开网站时还原您的上次阅读！</div> -->
       <div class="item">
         <div class="i-title">选一本书阅读</div>
@@ -408,7 +408,7 @@ export default {
       } else if (Command === "about") {
         this.$alert(`
           <div>
-            <p>欢迎使用书App阅读器！</p>
+            <p>欢迎使用网书阅读器！</p>
             <p>制作者：BlChock</p>
             <p>如有疑问请发邮件至510729981@qq.com</p>
             <p>如果您觉得好用请支持我，您的支持是我最大的动力！</p>
@@ -416,7 +416,7 @@ export default {
           <div style="text-align:center;margin-top:20px;">
             <img src="pay.png" width="200" />
           </div>
-        `, '书App', {
+        `, '网书', {
           dangerouslyUseHTMLString: true
         });
       } else if (Command === "percent") {
@@ -430,7 +430,7 @@ export default {
               <p>最近您使用的书签为 ${this.nowFlagName}</p>
               <p>建议您及时保存书签，以便下次打开书本继续阅读！</p>
             </div>
-          `, '书App', {
+          `, '网书', {
             dangerouslyUseHTMLString: true
           });
         }
