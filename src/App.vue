@@ -223,7 +223,7 @@
             size="small"
             @keyup.enter.native="handleInputConfirm"
             @blur="handleInputConfirm"
-            placeholder="书签名 (支持 名称@已读百分比，如: a@80.5%)"
+            placeholder="书签名 (支持 名称@已读百分比，如: 书签1@80.5%)"
           ></el-input>
           <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 新建书签</el-button>
         </el-card>
@@ -258,6 +258,7 @@ export default {
       txt:
         "font-family: '微软雅黑',font-size: 18px; line-height: 50px; padding: 50px;",
       imageUrl: "",
+      imageData: "",
       imgOpacity: 100,
       btnOpacity: 100,
       isFull: true,
@@ -437,15 +438,27 @@ export default {
       }
     },
     imgChanged(file) {
+      let self = this;
       this.imageUrl = URL.createObjectURL(file.raw);
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const context = canvas.getContext('2d');
+        context.drawImage(img, 0, 0);
+        const dataUrl = canvas.toDataURL('image/png');
+        self.imageData = dataUrl;
+      };
+      img.src = this.imageUrl;
     },
     resetImg() {
       this.imageUrl = "";
     },
     setBg() {
       let bg = "";
-      if (this.imageUrl.length > 0) {
-        bg = bg + "background:url(" + this.imageUrl + ") no-repeat; ";
+      if (this.imageData.length > 0) {
+        bg = bg + "background:url(" + this.imageData + ") no-repeat; ";
         if (this.isFull) {
           bg = bg + "background-size:100%; ";
         }
@@ -463,16 +476,18 @@ export default {
     },
     onBgOk() {
       this.setBg();
-      this.$cookies.set("ba_opacity", this.imgOpacity);
-      this.$cookies.set("ba_blur", this.blur);
-      this.$cookies.set("ba_bgcolor", this.bgColor);
-      this.$cookies.set("ba_bg_isfull", this.isFull);
-      this.$cookies.set("ba_btnopacity", this.btnOpacity);
+      localStorage.setItem("ba_opacity", this.imgOpacity);
+      localStorage.setItem("ba_blur", this.blur);
+      localStorage.setItem("ba_bgcolor", this.bgColor);
+      localStorage.setItem("ba_bg_isfull", this.isFull);
+      localStorage.setItem("ba_btnopacity", this.btnOpacity);
+      localStorage.setItem("ba_bg_url", this.imageUrl);
+      localStorage.setItem("ba_bg_data", this.imageData);
       this.bgDlg = false;
     },
     onBookOk() {
       this.openBook();
-      this.$cookies.set("ba_code", this.textCode);
+      localStorage.setItem("ba_code", this.textCode);
       this.bookDlg = false;
     },
     loadFile(e) {
@@ -502,7 +517,7 @@ export default {
         str = str + "text-decoration: underline; ";
       }
       this.txt = str;
-      this.$cookies.set("ba_txt", str);
+      localStorage.setItem("ba_txt", str);
       this.fontDlg = false;
     },
     onGuideOk() {
@@ -522,7 +537,7 @@ export default {
       )
         .then(() => {
           this.flags.splice(this.flags.indexOf(tag), 1);
-          this.$cookies.set("ba_flags", JSON.stringify(this.flags));
+          localStorage.setItem("ba_flags", JSON.stringify(this.flags));
         })
         .catch(() => {});
     },
@@ -538,7 +553,7 @@ export default {
       )
         .then(() => {
           this.flags = [];
-          this.$cookies.set("ba_flags", JSON.stringify(this.flags));
+          localStorage.setItem("ba_flags", JSON.stringify(this.flags));
         })
         .catch(() => {});
     },
@@ -589,7 +604,7 @@ export default {
         }
         this.inputVisible = false;
         this.inputValue = "";
-        this.$cookies.set("ba_flags", JSON.stringify(this.flags));
+        localStorage.setItem("ba_flags", JSON.stringify(this.flags));
       }
     },
     // 查找屏幕上第一个li
@@ -638,39 +653,36 @@ export default {
   components: {},
   mounted() {
     this.isReading = false;
-    // console.log("hello!", this.$cookies.keys());
-    if (this.$cookies.isKey("ba_opacity")) {
-      this.imgOpacity = Number(this.$cookies.get("ba_opacity"));
+    if (localStorage.getItem("ba_bg_url")) {
+      this.imageUrl = localStorage.getItem("ba_bg_url");
+      this.imageData = localStorage.getItem("ba_bg_data");
     }
-    if (this.$cookies.isKey("ba_btnopacity")) {
-      this.btnOpacity = Number(this.$cookies.get("ba_btnopacity"));
+    if (localStorage.getItem("ba_opacity")) {
+      this.imgOpacity = Number(localStorage.getItem("ba_opacity"));
     }
-    if (this.$cookies.isKey("ba_blur")) {
-      this.blur = Number(this.$cookies.get("ba_blur"));
+    if (localStorage.getItem("ba_btnopacity")) {
+      this.btnOpacity = Number(localStorage.getItem("ba_btnopacity"));
     }
-    if (this.$cookies.isKey("ba_bgcolor")) {
-      this.bgColor = this.$cookies.get("ba_bgcolor");
+    if (localStorage.getItem("ba_blur")) {
+      this.blur = Number(localStorage.getItem("ba_blur"));
     }
-    if (this.$cookies.isKey("ba_bg_isfull")) {
+    if (localStorage.getItem("ba_bgcolor")) {
+      this.bgColor = localStorage.getItem("ba_bgcolor");
+    }
+    if (localStorage.getItem("ba_bg_isfull")) {
       this.isFull = false;
-      if (this.$cookies.get("ba_bg_isfull") === "true") {
+      if (localStorage.getItem("ba_bg_isfull") === "true") {
         this.isFull = true;
       }
     }
-    // console.log("init",{
-    //   imgOpacity: this.imgOpacity,
-    //   blur: this.blur,
-    //   bgColor: this.bgColor,
-    //   isFull: this.isFull
-    // })
-    if (this.$cookies.isKey("ba_txt")) {
-      this.txt = this.$cookies.get("ba_txt");
+    if (localStorage.getItem("ba_txt")) {
+      this.txt = localStorage.getItem("ba_txt");
     }
-    if (this.$cookies.isKey("ba_code")) {
-      this.textCode = this.$cookies.get("ba_code");
+    if (localStorage.getItem("ba_code")) {
+      this.textCode = localStorage.getItem("ba_code");
     }
-    if (this.$cookies.isKey("ba_flags")) {
-      this.flags = JSON.parse(this.$cookies.get("ba_flags"));
+    if (localStorage.getItem("ba_flags")) {
+      this.flags = JSON.parse(localStorage.getItem("ba_flags"));
     }
     this.guideDlg = true;
   },
