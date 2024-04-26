@@ -16,7 +16,7 @@
     </div>
     <affix :offset="10" class="affixBtn">
       <el-dropdown @command="cmd">
-        <img src="./assets/logo.png" alt :style="'opacity:' + btnOpacity / 100" />
+        <img src="logo.png" alt :style="'opacity:' + btnOpacity / 100" />
         <el-dropdown-menu slot="dropdown">
           <el-dropdown-item command="book">书架</el-dropdown-item>
           <el-dropdown-item command="flag">书签</el-dropdown-item>
